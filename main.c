@@ -34,7 +34,6 @@ Int16 OutputBufferL[AUDIO_IO_SIZE];
 #pragma DATA_ALIGN(OutputBufferR,4)
 Int16 OutputBufferR[AUDIO_IO_SIZE];
 
-
 Uint16 stateL = 0;
 Uint16 stateR = 0;
 
@@ -43,6 +42,7 @@ Int16 historyR[AUDIO_IO_SIZE];
 
 Int16 bufferL[AUDIO_IO_SIZE];
 Int16 bufferR[AUDIO_IO_SIZE];
+
 /*
  *
  *  main( )
@@ -91,8 +91,8 @@ void main( void )
 
 		for(j=0; j < AUDIO_IO_SIZE; j++)
 		{
-			bufferL[j] = my_fir_circular(InputBufferL[j], FIRCoef, historyL, Ntap, &stateL);
-			bufferR[j] = my_fir_circular(InputBufferR[j], FIRCoef, historyR, Ntap, &stateR);
+			bufferL[j] = my_fir_circular(InputBufferL[j], FIRCoef_129, historyL, Ntap, &stateL);
+			bufferR[j] = my_fir_circular(InputBufferR[j], FIRCoef_129, historyR, Ntap, &stateR);
 			OutputBufferR[j] = bufferL[j];
 			OutputBufferL[j] = bufferR[j];
 		}
