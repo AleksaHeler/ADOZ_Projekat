@@ -19,6 +19,7 @@
 #include "ezdsp5535_i2s.h"
 #include "Dsplib.h"
 #include "WAVheader.h"
+#include "my_fir.h"
 
 static WAV_HEADER outputWAVhdr;
 static WAV_HEADER inputWAVhdr;
@@ -34,6 +35,14 @@ Int16 OutputBufferL[AUDIO_IO_SIZE];
 Int16 OutputBufferR[AUDIO_IO_SIZE];
 
 
+Uint16 stateL = 0;
+Uint16 stateR = 0;
+
+Int16 historyL[AUDIO_IO_SIZE];
+Int16 historyR[AUDIO_IO_SIZE];
+
+Int16 bufferL[AUDIO_IO_SIZE];
+Int16 bufferR[AUDIO_IO_SIZE];
 /*
  *
  *  main( )
@@ -70,14 +79,22 @@ void main( void )
 
     aic3204_write_wav_header(&outputWAVhdr);
 
+    /* Initialize history buffers to 0 */
+	for (i = 0; i < AUDIO_IO_SIZE; i++) {
+		historyL[i] = 0;
+		historyR[i] = 0;
+	}
+
 	for(i = 0; i < number_of_blocks; i++)
 	{
 		aic3204_read_block(InputBufferL, InputBufferR);
 
 		for(j=0; j < AUDIO_IO_SIZE; j++)
 		{
-			OutputBufferL[j] = InputBufferL[j];
-			OutputBufferR[j] = InputBufferL[j];
+			bufferL[j] = my_fir_circular(InputBufferL[j], FIRCoef, historyL, Ntap, &stateL);
+			bufferR[j] = my_fir_circular(InputBufferR[j], FIRCoef, historyR, Ntap, &stateR);
+			OutputBufferR[j] = bufferL[j];
+			OutputBufferL[j] = bufferR[j];
 		}
 
 		aic3204_write_block(OutputBufferL, OutputBufferR);
